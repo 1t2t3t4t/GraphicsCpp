@@ -8,7 +8,7 @@ conan_basic_setup()
 
 include_directories(Src)
 
-file(GLOB SRC Src/*.cpp)
+file(GLOB SRC Src/*.h Src/*.cpp)
 
 add_executable(GraphicsCpp ${SRC})
 target_link_libraries(GraphicsCpp ${CONAN_LIBS})
