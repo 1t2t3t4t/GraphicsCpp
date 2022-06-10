@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "TraingleRender.h"
+#include "Render.h"
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
@@ -112,8 +112,15 @@ int main()
     unsigned int VBO;
     glGenBuffers(1, &VBO);
 
+    // Init EBO for storing indices
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
     // Bind VBO to array buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // Bind EBO to element array buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     // Specify vertex data to be stored in VBO
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -138,7 +145,8 @@ int main()
         // Update and draw triangle
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

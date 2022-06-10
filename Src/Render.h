@@ -3,9 +3,15 @@
 #include <glad/glad.h>
 
 const float Vertices[] = {
-        -0.5, -0.5, 0,
-        0.5, -0.5, 0,
-        0, 0.5, 0
+        -0.5, -0.5, 0, // btl
+        0.5, -0.5, 0, // btr
+        0.5, 0.5, 0, // tr
+        -0.5, 0.5, 0 //tl
+};
+
+const unsigned int Indices[] = {
+        0, 1, 2,
+        3, 2, 0
 };
 
 const char *VertexShader = "#version 330 core\n"
@@ -33,6 +39,9 @@ void CompileShader(const unsigned int vertexShaderId, const unsigned  int fragme
 
 void Update()
 {
-    // Send triangle vertices to VBO
+    // Send rectangle vertices to VBO
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+    // Send rectangle indices to EBO
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
