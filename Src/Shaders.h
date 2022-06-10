@@ -12,3 +12,10 @@ const char *OrangeFragmentShader = "#version 330 core\n"
                                    "{\n"
                                    "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
                                    "}";
+
+const char *YellowFragmentShader = "#version 330 core\n"
+                                   "out vec4 FragColor;\n"
+                                   "void main()\n"
+                                   "{\n"
+                                   "FragColor = vec4(1.0f, 1.0f, 0.f, 1.0f);\n"
+                                   "}";

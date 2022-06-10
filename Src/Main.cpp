@@ -80,15 +80,15 @@ void ReportLinkProgramStatus(const unsigned int program)
     }
 }
 
-unsigned int CreateSimpleShaderProgram()
+unsigned int CreateSimpleShaderProgram(const char *vertexShaderSrc, const char *fragmentShaderSrc)
 {
     auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &SimpleVertexShader, nullptr);
+    glShaderSource(vertexShader, 1, &vertexShaderSrc, nullptr);
     glCompileShader(vertexShader);
     ReportShaderCompileStatus(vertexShader);
 
     auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &OrangeFragmentShader, nullptr);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSrc, nullptr);
     glCompileShader(fragmentShader);
     ReportShaderCompileStatus(fragmentShader);
 
@@ -113,7 +113,8 @@ int main()
         return -1;
     }
 
-    auto program = CreateSimpleShaderProgram();
+    auto programOrange = CreateSimpleShaderProgram(SimpleVertexShader, OrangeFragmentShader);
+    auto programYellow = CreateSimpleShaderProgram(SimpleVertexShader, YellowFragmentShader);
 
     const float vertices1[] = {
             -0.75, 0, 0,
@@ -154,11 +155,11 @@ int main()
         glClearColor(.3f, .3f, .3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(program);
-
+        glUseProgram(programOrange);
         glBindVertexArray(VAO[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        glUseProgram(programYellow);
         glBindVertexArray(VAO[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
