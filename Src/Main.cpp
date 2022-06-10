@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Shaders.h"
+
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -62,8 +64,44 @@ void ReportShaderCompileStatus(const unsigned int shaderId)
     if (!success)
     {
         glGetShaderInfoLog(shaderId, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+}
+
+void ReportLinkProgramStatus(const unsigned int program)
+{
+    int success;
+    char infoLog[512];
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
+    }
+}
+
+unsigned int CreateSimpleShaderProgram()
+{
+    auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &SimpleVertexShader, nullptr);
+    glCompileShader(vertexShader);
+    ReportShaderCompileStatus(vertexShader);
+
+    auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &OrangeFragmentShader, nullptr);
+    glCompileShader(fragmentShader);
+    ReportShaderCompileStatus(fragmentShader);
+
+    auto program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    ReportLinkProgramStatus(program);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return program;
 }
 
 int main()
@@ -75,6 +113,29 @@ int main()
         return -1;
     }
 
+    auto program = CreateSimpleShaderProgram();
+
+    const float vertices[] = {
+            -0.75, 0, 0,
+            -0.25, 0, 0,
+            -0.5, 0.5, 0,
+            0.25, 0, 0,
+            0.75, 0, 0,
+            0.5, -0.5, 0
+    };
+
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+    glEnableVertexAttribArray(0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
     while (!glfwWindowShouldClose(window))
     {
         ProcessInput(window);
@@ -82,6 +143,9 @@ int main()
         // Clear screen to grayish color
         glClearColor(.3f, .3f, .3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(program);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
