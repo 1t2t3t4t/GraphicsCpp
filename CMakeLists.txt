@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 project(GraphicsCpp)
 
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
