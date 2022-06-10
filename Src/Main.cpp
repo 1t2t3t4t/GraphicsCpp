@@ -115,26 +115,36 @@ int main()
 
     auto program = CreateSimpleShaderProgram();
 
-    const float vertices[] = {
+    const float vertices1[] = {
             -0.75, 0, 0,
             -0.25, 0, 0,
-            -0.5, 0.5, 0,
+            -0.5, 0.5, 0
+    };
+
+    const float vertices2[] = {
             0.25, 0, 0,
             0.75, 0, 0,
             0.5, -0.5, 0
     };
 
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    unsigned int VAO[2];
+    glGenVertexArrays(2, VAO);
+    glBindVertexArray(VAO[0]);
 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    unsigned int VBO[2];
+    glGenBuffers(2, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+
+    glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+    glEnableVertexAttribArray(0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -145,7 +155,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(program);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glBindVertexArray(VAO[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glBindVertexArray(VAO[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
