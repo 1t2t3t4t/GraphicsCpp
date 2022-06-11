@@ -10,5 +10,7 @@ include_directories(Src)
 
 file(GLOB SRC Src/*.h Src/*.cpp)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Shaders/)
+
 add_executable(GraphicsCpp ${SRC})
 target_link_libraries(GraphicsCpp ${CONAN_LIBS})

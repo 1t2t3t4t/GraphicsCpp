@@ -1,13 +1,14 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Shader.h"
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-GLFWwindow *createWindow()
+GLFWwindow *CreateWindow()
 {
     const int res = glfwInit();
     if (res != GLFW_TRUE)
@@ -54,26 +55,36 @@ void ProcessInput(GLFWwindow *window)
     }
 }
 
-void ReportShaderCompileStatus(const unsigned int shaderId)
-{
-    int success;
-    char infoLog[512];
-    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shaderId, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-}
+float TriangleVertices[] = {
+        // positions       // colors
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
+        0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // top
+};
 
 int main()
 {
-    GLFWwindow *window = createWindow();
+    GLFWwindow *window = CreateWindow();
 
     if (window == nullptr)
     {
         return -1;
     }
+
+    Shader shader("Shaders/VertexShader.glsl", "Shaders/FragShader.glsl");
+
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TriangleVertices), TriangleVertices, GL_STATIC_DRAW);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -82,6 +93,13 @@ int main()
         // Clear screen to grayish color
         glClearColor(.3f, .3f, .3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // Render
+//        double greenVal = pow(sin(glfwGetTime()), 2);
+//        int colorLocation = glGetUniformLocation(program, "color");
+        shader.use();
+//        glUniform3f(colorLocation, 0.0, (float)greenVal, 0.0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
