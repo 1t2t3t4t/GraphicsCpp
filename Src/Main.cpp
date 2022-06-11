@@ -95,10 +95,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Render
-//        double greenVal = pow(sin(glfwGetTime()), 2);
-//        int colorLocation = glGetUniformLocation(program, "color");
         shader.use();
-//        glUniform3f(colorLocation, 0.0, (float)greenVal, 0.0);
+        shader.setUniformF("hOffset", (float)sin(glfwGetTime()));
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);

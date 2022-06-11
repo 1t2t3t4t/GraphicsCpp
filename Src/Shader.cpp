@@ -27,7 +27,7 @@ void ReportLinkProgramStatus(const unsigned int program)
     }
 }
 
-void AddAndCompileSrc(const unsigned int id, const std::string src)
+void AddAndCompileSrc(const unsigned int id, const std::string& src)
 {
     auto cSrc = src.c_str();
     glShaderSource(id, 1, &cSrc, nullptr);
@@ -60,3 +60,14 @@ void Shader::use() const
 {
     glUseProgram(programId);
 }
+
+void Shader::setUniformF(const char *name, float value) const
+{
+    auto location = glGetUniformLocation(programId, name);
+    if (location == -1)
+    {
+        std::cout << "Cannot find uniform location: " << name << std::endl;
+    }
+    glUniform1f(location, value);
+}
+
