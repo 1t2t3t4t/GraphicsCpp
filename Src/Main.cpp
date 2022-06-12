@@ -11,10 +11,10 @@ void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 
 const float Vertices[] = {
         // pos        // texCoords
-        -0.5, 0.5, 0, 0, 1, // tl
-        0.5, 0.5, 0, 1, 1, // tr
+        -0.5, 0.5, 0, 0, 2, // tl
+        0.5, 0.5, 0, 2, 2, // tr
         -0.5, -0.5, 0, 0, 0, // bl
-        0.5, -0.5, 0, 1, 0 // br
+        0.5, -0.5, 0, 2, 0 // br
 };
 
 const unsigned int Indices[] = {
