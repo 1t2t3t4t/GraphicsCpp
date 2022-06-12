@@ -1,6 +1,9 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include "FileSystem.h"
 #include "MathUtils.h"
@@ -160,6 +163,14 @@ int main()
         shader.setUniformI("ourTexture", 0);
         shader.setUniformI("ourTexture2", 1);
         shader.setUniformF("Val", TextureVal);
+
+        // Rotate and Translate
+        glm::mat4 transform(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5, -0.5, 0));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.f, 0.f, 1.0f));
+        auto transformLoc = glGetUniformLocation(shader.GetId(), "Transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 

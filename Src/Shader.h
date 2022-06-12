@@ -8,6 +8,11 @@ private:
 public:
     Shader(const char* vertexShaderPath, const char* fragShaderPath);
 
+    unsigned int GetId() const 
+    {
+        return programId;
+    }
+
     void use() const;
 
     void setUniformI(const char *name, int value) const;
