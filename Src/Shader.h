@@ -10,5 +10,6 @@ public:
 
     void use() const;
 
+    void setUniformI(const char *name, int value) const;
     void setUniformF(const char *name, float value) const;
 };

@@ -72,3 +72,13 @@ void Shader::setUniformF(const char *name, float value) const
     glUniform1f(location, value);
 }
 
+void Shader::setUniformI(const char *name, int value) const
+{
+    auto location = glGetUniformLocation(programId, name);
+    if (location == -1)
+    {
+        std::cout << "Cannot find uniform location: " << name << std::endl;
+    }
+    glUniform1i(location, value);
+}
+
