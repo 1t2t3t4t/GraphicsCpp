@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <string>
+#include <iostream>
 #include "Shader.h"
 #include "FileSystem.h"
 

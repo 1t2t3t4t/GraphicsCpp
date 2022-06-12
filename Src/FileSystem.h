@@ -1,21 +1,10 @@
-#pragma once
+#ifndef GRAPHICSCPP_FILESYSTEM_H
+#define GRAPHICSCPP_FILESYSTEM_H
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
+std::string ReadFile(const char *fileName);
 
-std::string ReadFile(const char *fileName)
-{
-    std::ifstream file(fileName);
-    std::string output;
-    if (file.is_open())
-    {
-        std::stringstream fileStream;
-        fileStream << file.rdbuf();
-        output = fileStream.str();
-        file.close();
-    }
+unsigned char *LoadImage(const char *name, int *w, int *h, int *nrChannel);
 
-    return output;
-}
+void FreeImage(unsigned char *data);
+
+#endif //GRAPHICSCPP_FILESYSTEM_H
