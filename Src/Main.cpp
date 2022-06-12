@@ -174,6 +174,13 @@ int main()
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
+        glm::mat4 transform2(1.0f);
+        transform2 = glm::translate(transform2, glm::vec3(-0.5, 0.5, 0));
+        transform2 = glm::scale(transform2, glm::vec3((float)sin(glfwGetTime())));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform2));
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
