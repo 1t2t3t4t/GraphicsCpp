@@ -21,6 +21,7 @@ std::string ReadFile(const char *fileName)
 
 unsigned char *LoadImage(const char *name, int *w, int *h, int *nrChannel)
 {
+    stbi_set_flip_vertically_on_load(true);
     return stbi_load(name, w, h, nrChannel, 0);
 }
 
