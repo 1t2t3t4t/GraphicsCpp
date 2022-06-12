@@ -6,8 +6,9 @@ out vec4 FragColor;
 
 uniform sampler2D ourTexture;
 uniform sampler2D ourTexture2;
+uniform float Val;
 
 void main() {
     vec2 flippedCoord = vec2(-TexCoord.x, TexCoord.y);
-    FragColor = texture(ourTexture, flippedCoord);
+    FragColor = mix(texture(ourTexture, flippedCoord), texture(ourTexture2, TexCoord), Val);
 }

@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "Shader.h"
 #include "FileSystem.h"
+#include "MathUtils.h"
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
@@ -61,11 +62,23 @@ GLFWwindow *CreateWindow()
     return window;
 }
 
+float TextureVal = 0.f;
+
 void ProcessInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        TextureVal += 0.01;
+        TextureVal = MathUtils::Clamp(TextureVal, 0.f, 1.f);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        TextureVal -= 0.01;
+        TextureVal = MathUtils::Clamp(TextureVal, 0.f, 1.f);
     }
 }
 
@@ -111,6 +124,20 @@ int main()
     glGenerateMipmap(GL_TEXTURE_2D);
     FreeImage(faceTexture);
 
+    unsigned int containerTextureId;
+    glGenTextures(1, &containerTextureId);
+    glBindTexture(GL_TEXTURE_2D, containerTextureId);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    auto containerTexture = LoadImage("Assets/container.jpg", &w, &h, &nrChannel);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTexture);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    FreeImage(containerTexture);
+
     if (window == nullptr)
     {
         return -1;
@@ -125,7 +152,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, containerTextureId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, faceTextureId);
         shader.use();
+        shader.setUniformI("ourTexture", 0);
+        shader.setUniformI("ourTexture2", 1);
+        shader.setUniformF("Val", TextureVal);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
