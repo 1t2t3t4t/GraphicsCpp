@@ -8,7 +8,7 @@ conan_basic_setup()
 
 include_directories(Src)
 
-file(GLOB SRC Src/*.h Src/*.cpp)
+file(GLOB SRC Src/*.cpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Shaders/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Assets/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets/)

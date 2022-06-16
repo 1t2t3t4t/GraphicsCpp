@@ -13,17 +13,61 @@ void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-const float Vertices[] = {
-        // pos        // texCoords
-        -0.5, 0.5, 0, 0, 2, // tl
-        0.5, 0.5, 0, 2, 2, // tr
-        -0.5, -0.5, 0, 0, 0, // bl
-        0.5, -0.5, 0, 2, 0 // br
-};
+float Vertices[] = {
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+       -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+   };
 
 const unsigned int Indices[] = {
         0, 1, 2,
         1, 3, 2
+};
+
+glm::vec3 cubePositions[] = {
+            glm::vec3( 0.0f,  0.0f,   0.0f),
+            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f,  -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3( 2.4f, -0.4f,  -3.5f),
+            glm::vec3(-1.7f,  3.0f,  -7.5f),
+            glm::vec3( 1.3f, -2.0f,  -2.5f),
+            glm::vec3( 1.5f,  2.0f,  -2.5f),
+            glm::vec3( 1.5f,  0.2f,  -1.5f),
+            glm::vec3(-1.3f,  1.0f,  -1.5f)
 };
 
 GLFWwindow *CreateWindow()
@@ -60,6 +104,7 @@ GLFWwindow *CreateWindow()
     }
 
     glViewport(0, 0, 800, 600);
+    glEnable(GL_DEPTH_TEST);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
     return window;
@@ -152,7 +197,7 @@ int main()
 
         // Clear screen to grayish color
         glClearColor(.3f, .3f, .3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw
         glActiveTexture(GL_TEXTURE0);
@@ -165,21 +210,34 @@ int main()
         shader.setUniformF("Val", TextureVal);
 
         // Rotate and Translate
-        glm::mat4 transform(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.5, -0.5, 0));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.f, 0.f, 1.0f));
-        auto transformLoc = glGetUniformLocation(shader.GetId(), "Transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        glm::mat4 viewTf(1.0f);
+        viewTf = glm::translate(viewTf, glm::vec3(0.f, 0.f, -3.f));
+        
+        glm::mat4 projectionTf = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
+
+        auto viewTransformLoc = glGetUniformLocation(shader.GetId(), "ViewTransform");
+        glUniformMatrix4fv(viewTransformLoc, 1, GL_FALSE, glm::value_ptr(viewTf));
+
+        auto projTransformLoc = glGetUniformLocation(shader.GetId(), "ProjectionTransform");
+        glUniformMatrix4fv(projTransformLoc, 1, GL_FALSE, glm::value_ptr(projectionTf));
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        for (auto vec : cubePositions)
+        {
+            glm::mat4 transform(1.0f);
+            transform = glm::translate(transform, vec);
+            transform = glm::rotate(
+                transform,
+                glm::radians(20.f) * (float)glfwGetTime(), 
+                glm::vec3(1.f, 0.5f, 0.0f)
+            );    
+            
+            auto transformLoc = glGetUniformLocation(shader.GetId(), "Transform");
+            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-        glm::mat4 transform2(1.0f);
-        transform2 = glm::translate(transform2, glm::vec3(-0.5, 0.5, 0));
-        transform2 = glm::scale(transform2, glm::vec3((float)sin(glfwGetTime())));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform2));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
