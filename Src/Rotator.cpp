@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-glm::vec3 Rotator::ToVec3() const
+glm::vec3 Rotator::Direction() const
 {
     const auto x = glm::cos(glm::radians(Yaw)) * glm::cos(glm::radians(Pitch));
     const auto y = glm::sin(glm::radians(Pitch));

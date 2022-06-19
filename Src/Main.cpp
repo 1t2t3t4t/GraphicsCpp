@@ -8,6 +8,7 @@
 #include "FileSystem.h"
 #include "MathUtils.h"
 #include "Rotator.h"
+#include "Camera.h"
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
@@ -72,9 +73,8 @@ glm::vec3 cubePositions[] = {
 };
 
 float TextureVal = 0.f;
-glm::vec3 camPos(0.f, 0.f, 3.f);
-Rotator camRot;
-glm::vec3 camUp(0.f, 1.f, 0.f);
+Camera Cam(glm::vec3(0.f, 0.f, 3.f));
+
 float camSpeed = 5.f;
 float LastX = 400;
 float LastY = 300;
@@ -97,10 +97,12 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
     offSetX *= Sensitivity;
     offSetY *= Sensitivity;
 
+    Rotator camRot = Cam.getRot();
     camRot.Pitch += (float)offSetY;
     camRot.Yaw += (float)offSetX;
 
     camRot.Pitch = MathUtils::Clamp(camRot.Pitch, -89.f, 89.f);
+    Cam.setRot(camRot);
 }
 
 GLFWwindow *CreateWindow()
@@ -160,7 +162,8 @@ void ProcessInput(GLFWwindow *window, const float deltaTime)
         TextureVal = MathUtils::Clamp(TextureVal, 0.f, 1.f);
     }
 
-    const auto camForward = camRot.ToVec3();
+    const auto camForward = Cam.getRot().Direction();
+    auto camPos = Cam.getPos();
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         camPos += camSpeed * camForward * deltaTime;
@@ -171,12 +174,13 @@ void ProcessInput(GLFWwindow *window, const float deltaTime)
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camPos += camSpeed * glm::normalize(glm::cross(camForward, camUp)) * deltaTime;
+        camPos += camSpeed * glm::normalize(glm::cross(camForward, Cam.getUp())) * deltaTime;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camPos += camSpeed * glm::normalize(glm::cross(camUp, camForward)) * deltaTime;
+        camPos += camSpeed * glm::normalize(glm::cross(Cam.getUp(), camForward)) * deltaTime;
     }
+    Cam.setPos(camPos);
 }
 
 int main()
@@ -265,11 +269,7 @@ int main()
         shader.setUniformF("Val", TextureVal);
 
         // Cam
-        glm::mat4 viewTf = glm::lookAt(
-                camPos,
-                camPos + camRot.ToVec3(),
-                camUp
-        );
+        glm::mat4 viewTf = Cam.ViewTransform();
 
         glm::mat4 projectionTf = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
 

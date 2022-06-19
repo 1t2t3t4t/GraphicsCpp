@@ -9,5 +9,5 @@ public:
     float Pitch = 0.f;
     float Roll = 0.f;
 
-    glm::vec3 ToVec3() const;
+    glm::vec3 Direction() const;
 };
