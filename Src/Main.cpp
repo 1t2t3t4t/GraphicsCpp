@@ -154,12 +154,10 @@ void ProcessInput(GLFWwindow *window, const float deltaTime)
     } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         TextureVal += 0.01;
-        position.z += 0.1;
         TextureVal = MathUtils::Clamp(TextureVal, 0.f, 1.f);
     } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
         TextureVal -= 0.01;
-        position.z -= 0.1;
         TextureVal = MathUtils::Clamp(TextureVal, 0.f, 1.f);
     }
 
@@ -182,6 +180,20 @@ void ProcessInput(GLFWwindow *window, const float deltaTime)
         camPos += camSpeed * glm::normalize(glm::cross(Cam.getUp(), camForward)) * deltaTime;
     }
     Cam.setPos(camPos);
+}
+
+void SetupLight(unsigned int *VAO, unsigned int *VBO)
+{
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, VBO);
+
+    glBindVertexArray(*VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 }
 
 int main()
@@ -207,7 +219,11 @@ int main()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *) (sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
+    unsigned int lightVAO, lightVBO;
+    SetupLight(&lightVAO, &lightVBO);
+
     // Init Shader
+    Shader lightShader("Shaders/LightSourceVertexShader.glsl", "Shaders/LightSourceFragShader.glsl");
     Shader shader("Shaders/VertexShader.glsl", "Shaders/FragShader.glsl");
 
     // Init Texture
@@ -260,44 +276,52 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, containerTextureId);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, faceTextureId);
         shader.use();
-        shader.setUniformI("ourTexture", 0);
-        shader.setUniformI("ourTexture2", 1);
-        shader.setUniformF("Val", TextureVal);
+        shader.setUniformV3("objectColor", 1.0f, 0.5f, 0.31f);
+        shader.setUniformV3("lightColor", 1.0f, 1.0f, 1.0f);
 
         // Cam
         glm::mat4 viewTf = Cam.ViewTransform();
 
         glm::mat4 projectionTf = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
 
-        auto viewTransformLoc = glGetUniformLocation(shader.GetId(), "ViewTransform");
+        auto viewTransformLoc = glGetUniformLocation(shader.GetId(), "view");
         glUniformMatrix4fv(viewTransformLoc, 1, GL_FALSE, glm::value_ptr(viewTf));
 
-        auto projTransformLoc = glGetUniformLocation(shader.GetId(), "ProjectionTransform");
+        auto projTransformLoc = glGetUniformLocation(shader.GetId(), "projection");
         glUniformMatrix4fv(projTransformLoc, 1, GL_FALSE, glm::value_ptr(projectionTf));
 
         glBindVertexArray(VAO);
-        for (auto vec: cubePositions)
+        unsigned int idx = 0;
+        for (auto vec : cubePositions)
         {
             glm::mat4 transform(1.0f);
             transform = glm::translate(transform, vec);
-            transform = glm::rotate(
+            if (idx % 3 == 0 )
+            {
+                transform = glm::rotate(
                     transform,
                     glm::radians(20.f) * (float) glfwGetTime(),
                     glm::vec3(1.f, 0.5f, 0.0f)
-            );
+                );
+            }
 
-            auto transformLoc = glGetUniformLocation(shader.GetId(), "Transform");
+            auto transformLoc = glGetUniformLocation(shader.GetId(), "model");
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
-
             idx++;
         }
+
+        glBindVertexArray(lightVAO);
+        lightShader.use();
+        glm::mat4 lightTransform(1.0f);
+        lightTransform = glm::translate(lightTransform, glm::vec3(0.f, 2.f, -1.f));
+        lightShader.setUniformMat4f("model", lightTransform);
+        lightShader.setUniformMat4f("view", viewTf);
+        lightShader.setUniformMat4f("projection", projectionTf);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

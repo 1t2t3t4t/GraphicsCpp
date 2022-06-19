@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <string>
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include "FileSystem.h"
 
@@ -82,3 +83,22 @@ void Shader::setUniformI(const char *name, int value) const
     glUniform1i(location, value);
 }
 
+void Shader::setUniformV3(const char *name, float x, float y, float z) const 
+{
+    auto loc = glGetUniformLocation(programId, name);
+    if (loc == -1)
+    {
+        std::cout << "Cannot find uniform location: " << name << std::endl;
+    }
+    glUniform3f(loc, x, y, z);
+}
+
+void Shader::setUniformMat4f(const char *name, glm::mat4 mat) const
+{
+    auto loc = glGetUniformLocation(programId, name);
+    if (loc == -1)
+    {
+        std::cout << "Cannot find uniform location: " << name << std::endl;
+    }
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+}
